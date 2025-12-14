@@ -9,7 +9,8 @@ import {
   Alert,
   Paper,
   InputAdornment,
-  IconButton
+  IconButton,
+  CircularProgress
 } from "@mui/material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -21,6 +22,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -29,6 +31,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       const res = await fetch("http://localhost:5001/api/auth/login", {
         method: "POST",
@@ -38,14 +41,20 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.message || "Login failed");
+        setLoading(false);
       } else {
         // Save JWT token to localStorage
         localStorage.setItem("token", data.token);
-        // Redirect to dashboard or home
-        navigate("/dashboard");
+        // Show loading for a moment before navigating
+        setTimeout(() => {
+          setLoading(false);
+          // Redirect to dashboard or home
+          navigate("/dashboard");
+        }, 1000);
       }
     } catch (err) {
       setError("Network error");
+      setLoading(false);
     }
   };
 
@@ -79,56 +88,63 @@ export default function Login() {
               Login
             </Typography>
           </Box>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              margin="normal"
-              fullWidth
-              label="Email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlinedIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              label="Password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={form.password}
-              onChange={handleChange}
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword((show) => !show)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 3, mb: 2, fontWeight: 600, letterSpacing: 1 }}
-            >
-              Login
-            </Button>
-          </form>
+          {loading ? (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
+              <CircularProgress />
+              <Box sx={{ mt: 2 }}>Logging in...</Box>
+            </Box>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlinedIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={handleChange}
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword((show) => !show)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                sx={{ mt: 3, mb: 2, fontWeight: 600, letterSpacing: 1 }}
+              >
+                Login
+              </Button>
+            </form>
+          )}
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Typography variant="body2">
               Don't have an account?{" "}

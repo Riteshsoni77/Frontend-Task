@@ -1,26 +1,38 @@
 import { useEffect, useState } from "react";
 import {
-  Container,
-  Typography,
   Box,
-  Button,
-  TextField,
+  Drawer,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
+  Typography,
+  Avatar,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   IconButton,
   Checkbox,
-  AppBar,
-  Toolbar,
-  Paper,
-  Grid,
   Divider,
-  Avatar,
+  InputAdornment,
 } from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
+
+const drawerWidth = 260;
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null);
@@ -123,175 +135,143 @@ export default function Dashboard() {
   if (!profile) return null;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        minWidth: "100vw",
-        background: "#f5f6fa",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <AppBar position="static" color="primary" elevation={2}>
-        <Toolbar>
-          <AssignmentTurnedInIcon sx={{ mr: 1 }} />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Dashboard
-          </Typography>
-          <Button color="inherit" onClick={handleLogout}>
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Box
+    <Box sx={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
+      {/* Sidebar */}
+      <Drawer
+        variant="permanent"
         sx={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 4,
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            borderRight: "none",
+            background: "#fff",
+            boxShadow: "2px 0 8px #f0f1f3",
+          },
         }}
       >
-        <Container maxWidth="md">
-          <Grid
-            container
-            spacing={4}
-            alignItems="stretch"
-            justifyContent="center"
-          >
-            <Grid item xs={12} md={5}>
-              <Paper
-                elevation={4}
-                sx={{
-                  p: 4,
-                  borderRadius: 3,
-                  textAlign: "center",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: "primary.main",
-                    width: 70,
-                    height: 70,
-                    mx: "auto",
-                    mb: 2,
-                  }}
-                >
-                  <AccountCircleIcon sx={{ fontSize: 48 }} />
-                </Avatar>
-                <Typography variant="h5" gutterBottom fontWeight={700}>
-                  Profile
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Typography variant="body1" fontWeight={600}>
-                  {profile.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {profile.email}
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={7}>
-              <Paper
-                elevation={4}
-                sx={{
-                  p: 4,
-                  borderRadius: 3,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <AssignmentTurnedInIcon color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="h5" fontWeight={700}>
-                    Tasks
-                  </Typography>
-                </Box>
-                <Box
-                  component="form"
-                  onSubmit={handleAddTask}
-                  sx={{
-                    display: "flex",
-                    gap: 2,
-                    mb: 2,
-                  }}
-                >
-                  <TextField
-                    label="New Task"
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                    fullWidth
-                    error={!!taskError}
-                    helperText={taskError}
-                  />
-                  <Button type="submit" variant="contained">
-                    Add
-                  </Button>
-                </Box>
-                <TextField
-                  label="Search Tasks"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  fullWidth
-                  size="small"
-                  sx={{ mb: 2 }}
-                />
-                <Divider sx={{ mb: 2 }} />
-                <List sx={{ maxHeight: 340, overflow: "auto" }}>
-                  {filteredTasks.length === 0 && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      align="center"
-                      sx={{ mt: 2 }}
-                    >
-                      No tasks found.
-                    </Typography>
-                  )}
-                  {filteredTasks.map((task) => (
-                    <ListItem
-                      key={task.id}
-                      secondaryAction={
-                        <IconButton
-                          edge="end"
-                          onClick={() => handleDeleteTask(task.id)}
-                          aria-label="delete"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      }
-                      disablePadding
-                      sx={{
-                        borderRadius: 2,
-                        mb: 1,
-                        bgcolor: task.completed ? "#e0f7fa" : "inherit",
-                      }}
-                    >
-                      <Checkbox
-                        checked={task.completed}
-                        onChange={() => handleToggleComplete(task)}
-                        sx={{ ml: 1 }}
-                      />
-                      <ListItemText
-                        primary={task.title}
-                        sx={{
-                          textDecoration: task.completed ? "line-through" : "none",
-                          ml: 1,
-                          color: task.completed ? "text.secondary" : "text.primary",
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 4 }}>
+          <Avatar sx={{ width: 80, height: 80, mb: 2, bgcolor: "#e0e7ef" }}>
+            <PersonIcon sx={{ fontSize: 48, color: "#3b82f6" }} />
+          </Avatar>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            Welcome,
+          </Typography>
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
+            {profile.name}
+          </Typography>
+        </Box>
+        <Divider />
+        <List>
+          <ListItem button selected>
+            <ListItemIcon>
+              <DashboardIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Dashboard" />
+          </ListItem>
+          <ListItem button onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItem>
+        </List>
+      </Drawer>
+
+      {/* Main Content */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, md: 6 },
+          width: `calc(100vw - ${drawerWidth}px)`,
+          minHeight: "100vh",
+          background: "#f8fafc",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+          <Typography variant="h4" fontWeight={700}>
+            Tasks
+          </Typography>
+          <Button variant="outlined" onClick={handleLogout} sx={{ display: { xs: "block", md: "none" } }}>
+            Logout
+          </Button>
+        </Box>
+        <Box
+          component="form"
+          onSubmit={handleAddTask}
+          sx={{
+            display: "flex",
+            gap: 2,
+            mb: 3,
+            maxWidth: 600,
+          }}
+        >
+          <TextField
+            label="New Task"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            fullWidth
+            error={!!taskError}
+            helperText={taskError}
+          />
+          <Button type="submit" variant="contained">
+            Add
+          </Button>
+        </Box>
+        <TextField
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          fullWidth
+          sx={{ mb: 3, maxWidth: 480 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 2px 12px #f0f1f3" }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Title</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Completed</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredTasks.map((task) => (
+                <TableRow key={task.id}>
+                  <TableCell>{task.title}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={task.completed}
+                      onChange={() => handleToggleComplete(task)}
+                      icon={<RadioButtonUncheckedIcon />}
+                      checkedIcon={<CheckCircleIcon color="success" />}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {/* You can add edit functionality here */}
+                    <IconButton onClick={() => handleDeleteTask(task.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {filteredTasks.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No tasks found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Box>
   );
