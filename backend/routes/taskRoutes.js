@@ -1,5 +1,5 @@
 const express = require("express");
-const Task = require("../models/Task");
+const { Task, User } = require("../models");
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -15,7 +15,10 @@ router.post("/", protect, async (req, res) => {
 
 // Get all tasks for user
 router.get("/", protect, async (req, res) => {
-  const tasks = await Task.findAll({ where: { userId: req.userId } });
+  const tasks = await Task.findAll({
+    where: { userId: req.user.id },
+    include: [{ model: User, attributes: ["name"] }]
+  });
   res.json(tasks);
 });
 

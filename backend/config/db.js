@@ -1,12 +1,12 @@
 const { Sequelize } = require("sequelize");
-
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    dialect: "mysql"
+    dialect: "mysql",
+    logging: false,
   }
 );
 
@@ -14,9 +14,12 @@ const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log("MySQL Connected");
-  } catch (error) {
-    console.error("DB Error:", error);
+    // This line will create tables if they don't exist
+    await sequelize.sync();
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
   }
 };
 
-module.exports = { sequelize, connectDB };
+module.exports = { connectDB, sequelize };

@@ -14,8 +14,12 @@ import {
   Toolbar,
   Paper,
   Grid,
+  Divider,
+  Avatar,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -31,7 +35,7 @@ export default function Dashboard() {
       navigate("/login");
       return;
     }
-    fetch("http://localhost:5000/api/profile", {
+    fetch("http://localhost:5001/api/profile", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -48,7 +52,7 @@ export default function Dashboard() {
   // Fetch tasks
   useEffect(() => {
     if (!token) return;
-    fetch("http://localhost:5000/api/tasks", {
+    fetch("http://localhost:5001/api/tasks", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -63,7 +67,7 @@ export default function Dashboard() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
-    const res = await fetch("http://localhost:5000/api/tasks", {
+    const res = await fetch("http://localhost:5001/api/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,7 +83,7 @@ export default function Dashboard() {
   };
 
   const handleToggleComplete = async (task) => {
-    const res = await fetch(`http://localhost:5000/api/tasks/${task.id}`, {
+    const res = await fetch(`http://localhost:5001/api/tasks/${task.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +101,7 @@ export default function Dashboard() {
   };
 
   const handleDeleteTask = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+    const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -109,9 +113,18 @@ export default function Dashboard() {
   if (!profile) return null;
 
   return (
-    <>
-      <AppBar position="static">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        minWidth: "100vw",
+        background: "#f5f6fa",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <AppBar position="static" color="primary" elevation={2}>
         <Toolbar>
+          <AssignmentTurnedInIcon sx={{ mr: 1 }} />
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Dashboard
           </Typography>
@@ -120,23 +133,75 @@ export default function Dashboard() {
           </Button>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="md">
-        <Box sx={{ my: 4 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 4,
+        }}
+      >
+        <Container maxWidth="md">
+          <Grid
+            container
+            spacing={4}
+            alignItems="stretch"
+            justifyContent="center"
+          >
+            <Grid item xs={12} md={5}>
+              <Paper
+                elevation={4}
+                sx={{
+                  p: 4,
+                  borderRadius: 3,
+                  textAlign: "center",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    width: 70,
+                    height: 70,
+                    mx: "auto",
+                    mb: 2,
+                  }}
+                >
+                  <AccountCircleIcon sx={{ fontSize: 48 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom fontWeight={700}>
                   Profile
                 </Typography>
-                <Typography>Name: {profile.name}</Typography>
-                <Typography>Email: {profile.email}</Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body1" fontWeight={600}>
+                  {profile.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {profile.email}
+                </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Tasks
-                </Typography>
+            <Grid item xs={12} md={7}>
+              <Paper
+                elevation={4}
+                sx={{
+                  p: 4,
+                  borderRadius: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <AssignmentTurnedInIcon color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="h5" fontWeight={700}>
+                    Tasks
+                  </Typography>
+                </Box>
                 <Box
                   component="form"
                   onSubmit={handleAddTask}
@@ -151,12 +216,24 @@ export default function Dashboard() {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                     fullWidth
+                    size="medium"
                   />
-                  <Button type="submit" variant="contained">
+                  <Button type="submit" variant="contained" size="medium">
                     Add
                   </Button>
                 </Box>
-                <List>
+                <Divider sx={{ mb: 2 }} />
+                <List sx={{ maxHeight: 340, overflow: "auto" }}>
+                  {tasks.length === 0 && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      align="center"
+                      sx={{ mt: 2 }}
+                    >
+                      No tasks yet. Add your first task!
+                    </Typography>
+                  )}
                   {tasks.map((task) => (
                     <ListItem
                       key={task.id}
@@ -164,21 +241,29 @@ export default function Dashboard() {
                         <IconButton
                           edge="end"
                           onClick={() => handleDeleteTask(task.id)}
+                          aria-label="delete"
                         >
                           <DeleteIcon />
                         </IconButton>
                       }
                       disablePadding
+                      sx={{
+                        borderRadius: 2,
+                        mb: 1,
+                        bgcolor: task.completed ? "#e0f7fa" : "inherit",
+                      }}
                     >
                       <Checkbox
                         checked={task.completed}
                         onChange={() => handleToggleComplete(task)}
+                        sx={{ ml: 1 }}
                       />
                       <ListItemText
                         primary={task.title}
                         sx={{
                           textDecoration: task.completed ? "line-through" : "none",
                           ml: 1,
+                          color: task.completed ? "text.secondary" : "text.primary",
                         }}
                       />
                     </ListItem>
@@ -187,8 +272,8 @@ export default function Dashboard() {
               </Paper>
             </Grid>
           </Grid>
-        </Box>
-      </Container>
-    </>
+        </Container>
+      </Box>
+    </Box>
   );
 }
