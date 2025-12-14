@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+  const [taskError, setTaskError] = useState("");
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
@@ -66,7 +68,11 @@ export default function Dashboard() {
 
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (!newTask.trim()) return;
+    setTaskError("");
+    if (!newTask.trim()) {
+      setTaskError("Task title is required");
+      return;
+    }
     const res = await fetch("http://localhost:5001/api/tasks", {
       method: "POST",
       headers: {
@@ -109,6 +115,10 @@ export default function Dashboard() {
       setTasks(tasks.filter((t) => t.id !== id));
     }
   };
+
+  const filteredTasks = tasks.filter((task) =>
+    task.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (!profile) return null;
 
@@ -216,25 +226,34 @@ export default function Dashboard() {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                     fullWidth
-                    size="medium"
+                    error={!!taskError}
+                    helperText={taskError}
                   />
-                  <Button type="submit" variant="contained" size="medium">
+                  <Button type="submit" variant="contained">
                     Add
                   </Button>
                 </Box>
+                <TextField
+                  label="Search Tasks"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
                 <Divider sx={{ mb: 2 }} />
                 <List sx={{ maxHeight: 340, overflow: "auto" }}>
-                  {tasks.length === 0 && (
+                  {filteredTasks.length === 0 && (
                     <Typography
                       variant="body2"
                       color="text.secondary"
                       align="center"
                       sx={{ mt: 2 }}
                     >
-                      No tasks yet. Add your first task!
+                      No tasks found.
                     </Typography>
                   )}
-                  {tasks.map((task) => (
+                  {filteredTasks.map((task) => (
                     <ListItem
                       key={task.id}
                       secondaryAction={
